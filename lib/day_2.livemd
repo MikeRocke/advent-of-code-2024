@@ -1,0 +1,62 @@
+# Advent of Code 2024 - Day 2
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.14.2"}
+])
+```
+
+## Input
+
+```elixir
+file_input = Kino.Input.file("day_2.txt")
+```
+
+```elixir
+file = Kino.Input.read(file_input)
+path = Kino.Input.file_path(file.file_ref)
+
+parse_number_list = fn input ->
+  String.split(input)
+  |> Enum.map(&String.to_integer/1)
+end
+
+
+puzzle_input = File.stream!(path, :line) 
+  |> Stream.map(&String.trim/1) 
+  |> Stream.map(parse_number_list)
+  |> Enum.to_list()
+```
+
+## Part One
+
+The engineers are trying to figure out which reports are safe. The Red-Nosed reactor safety systems can only tolerate levels that are either gradually increasing or gradually decreasing. So, a report only counts as safe if both of the following are true:
+
+```
+The levels are either all increasing or all decreasing.
+Any two adjacent levels differ by at least one and at most three.
+```
+
+```elixir
+Enum.filter(puzzle_input, fn report -> 
+  sorted = Enum.sort(report)
+  is_asc = sorted == report
+  is_desc = Enum.sort(report, :desc) == report
+  is_uniq = report == Enum.uniq(report)
+  [h|t] = sorted
+
+  {_, max_diff} = Enum.reduce(sorted, {h, 0}, fn x, {previous, max_difference} ->
+    difference = abs(previous - x)
+    {x, max(difference, max_difference)}
+  end)
+  
+  (is_asc || is_desc) && max_diff <= 3 && is_uniq
+  end)
+|> Enum.count()
+```
+
+## Part Two
+
+The Problem Dampener is a reactor-mounted module that lets the reactor safety systems tolerate a single bad level in what would otherwise be a safe report. It's like the bad level never happened!
+
+Now, the same rules apply as before, except if removing a single level from an unsafe report would make it safe, the report instead counts as safe.
