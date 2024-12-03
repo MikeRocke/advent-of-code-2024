@@ -38,7 +38,7 @@ Any two adjacent levels differ by at least one and at most three.
 ```
 
 ```elixir
-Enum.filter(puzzle_input, fn report -> 
+is_safe = fn report -> 
   sorted = Enum.sort(report)
   is_asc = sorted == report
   is_desc = Enum.sort(report, :desc) == report
@@ -51,7 +51,8 @@ Enum.filter(puzzle_input, fn report ->
   end)
   
   (is_asc || is_desc) && max_diff <= 3 && is_uniq
-  end)
+  end
+Enum.filter(puzzle_input, is_safe)
 |> Enum.count()
 ```
 
@@ -60,3 +61,11 @@ Enum.filter(puzzle_input, fn report ->
 The Problem Dampener is a reactor-mounted module that lets the reactor safety systems tolerate a single bad level in what would otherwise be a safe report. It's like the bad level never happened!
 
 Now, the same rules apply as before, except if removing a single level from an unsafe report would make it safe, the report instead counts as safe.
+
+```elixir
+Enum.filter(puzzle_input, fn report ->
+  sub_lists = for i <- 0 .. length(report), do: List.delete_at(report, i)
+  Enum.count(sub_lists, is_safe) > 0
+end)
+|> Enum.count()
+```
